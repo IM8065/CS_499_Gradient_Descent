@@ -5,6 +5,10 @@ from matplotlib import pyplot
 from sklearn.preprocessing import scale
 from sklearn.model_selection import train_test_split
 
+from sklearn.metrics import roc_curve, auc
+from scipy import interp
+from sklearn.metrics import roc_auc_score
+
 # function: calc_gradient
 # calculates the gradient for a specific weightVector
 # returns: the mean of the gradients as a vector
@@ -196,3 +200,27 @@ print("{: >11} {: >9} {: >9}".format("", "log reg", "baseline"))
 print("{: >11} {: >9} {: >9}".format("train", str(train_error) + "%", str(base_train_error) + "%"))
 print("{: >11} {: >9} {: >9}".format("validation", str(val_error) + "%", str(base_val_error) + "%"))
 print("{: >11} {: >9} {: >9}".format("test", str(test_error) + "%", str(base_test_error) + "%"))
+
+fpr = dict()
+tpr = dict()
+roc_auc = dict()
+for i in range(y_test.shape[0]):
+    fpr[i], tpr[i], _ = roc_curve(y_test[:, i], X_test[:, i])
+    roc_auc[i] = auc(fpr[i], tpr[i])
+
+# Compute micro-average ROC curve and ROC area
+fpr["micro"], tpr["micro"], _ = roc_curve(y_test.ravel(), y_score.ravel())
+roc_auc["micro"] = auc(fpr["micro"], tpr["micro"])
+
+plt.figure()
+lw = 2
+plt.plot(fpr[2], tpr[2], color='darkorange',
+         lw=lw, label='ROC curve (area = %0.2f)' % roc_auc[2])
+plt.plot([0, 1], [0, 1], color='navy', lw=lw, linestyle='--')
+plt.xlim([0.0, 1.0])
+plt.ylim([0.0, 1.05])
+plt.xlabel('False Positive Rate')
+plt.ylabel('True Positive Rate')
+plt.title('Receiver operating characteristic example')
+plt.legend(loc="lower right")
+plt.show()
